@@ -4,6 +4,7 @@ import argparse
 
 from data import load_data_set
 from data import SequenceDataModule
+from essentials import other_functions
 
 
 SequenceDataModule(train_sequences=)
@@ -18,10 +19,6 @@ y_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\
 ## path to safe model
 save_model_path = r"P:\workspace\jan\fire_detection\dl\models_store\06_LSTM_Light"
 
-if os.path.exists(base_path):
-    print("path exists")
-else:
-    os.mkdir(base_path)
 
 
 ## model params
