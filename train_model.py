@@ -1,4 +1,5 @@
 import argparse
+import random
 
 import pandas as pd
 import numpy as np
@@ -19,6 +20,8 @@ from torchmetrics.functional import accuracy
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import Normalizer
+
 import multiprocessing
 import seaborn as sns
 from pylab import rcParams
@@ -26,22 +29,21 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 import matplotlib
 from matplotlib.ticker import MaxNLocator
+import random
 
 
 from data import load_data_set
-from data import SequenceDataModule, TimeSeriesDataset
+from data import SequenceDataModule
 from data import data_labeler
+from data import TimeSeriesDataset
 
 from essentials import other_functions
 from essentials import check_path
 
 
-
-SequenceDataModule(train_sequences=)
-
-
 ## Globals #######
 plt.switch_backend('agg')
+random.seed(102)
 
 ## X train path
 x_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\06_df_x_12_250smps.csv"
@@ -70,10 +72,21 @@ if __name__ ==  '__main__':
     y_train = pd.read_csv(y_train_data_path, sep=';')
     print(X_train.shape, y_train.shape)
 
+    X_train.T
+
     # data label
     y_train = data_labeler(y_train)
 
     ## data set
+    dset = TimeSeriesDataset(X_train, y_train, 25)
+
+    ## split train test
+    train_sequences, test_sequences = train_test_split(dset, test_size=0.2)
+    train_sequences[1]
+    print("Number of Training Sequences: ", len(train_sequences))
+    print("Number of Testing Sequences: ", len(test_sequences))
+    """
+
 
 
 
