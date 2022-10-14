@@ -30,7 +30,7 @@ from matplotlib.ticker import MaxNLocator
 
 from data import load_data_set
 from data import SequenceDataModule
-from data import data_labeler
+import data
 from essentials import other_functions
 from essentials import check_path
 
