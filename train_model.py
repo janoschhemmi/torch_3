@@ -69,8 +69,12 @@ if __name__ ==  '__main__':
     y_train = pd.read_csv(y_train_data_path, sep=';')
     print(X_train.shape, y_train.shape)
 
-    ## data labeler
-    y_train = data
+    # data label
+    y_train = data_labeler(y_train)
+
+    ## data set
+
+
 
     # reshape
     X_train = (X_train.set_index(['id', 'index', 'instances_rep'])

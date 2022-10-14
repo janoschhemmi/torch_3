@@ -56,37 +56,22 @@ for instances, group in X_train.groupby("instances_rep"):
 
 
 tt = X_train[:32]
+
 class TimeSeriesDataset(torch.utils.data.Dataset):
     def __init__(self, Xs, ys, Index_list, n_steps):
         super(torch.utils.data.Dataset,self).__init__()
         self.index_list = Index_list
 
-
         ## convert to tensor
         X = [torch.tensor(group[group.columns[-n_steps:]].values) for instance,group in Xs.groupby("instances_rep")]
+        y = torch.tensor(ys['label'])
 
-        ## create label for y
-
-        y
-
-        for group in tt.groupby("instances_rep"):
-            print(group)
-
-
-        ttt = tt.groupby("instances_rep")
-        sequences = []
-        tt[chr(n_steps_list)]
-
-        n_steps = 25
-
-
+        self.X = X
+        self.y = y
 
     def __len__(self):
         return len(self.X)
 
     def __getitem__(self, idx):
-
-        sequence_features = group[FEATURE_COLUMNS]
-        sequence_features = sequence_features.transpose()
         return self.X[idx], self.y[idx]
 
