@@ -29,8 +29,9 @@ from matplotlib.ticker import MaxNLocator
 
 
 from data import load_data_set
-from data import SequenceDataModule
+from data import SequenceDataModule, TimeSeriesDataset
 from data import data_labeler
+
 from essentials import other_functions
 from essentials import check_path
 
@@ -73,6 +74,7 @@ if __name__ ==  '__main__':
     y_train = data_labeler(y_train)
 
     ## data set
+
 
 
 

@@ -43,7 +43,7 @@ class Sequence_Dataset(Dataset):
 
 ## create data set
 
-X_train
+"""X_train
 
 for instances, group in X_train.groupby("instances_rep"):
     print(id)
@@ -52,15 +52,13 @@ for instances, group in X_train.groupby("instances_rep"):
 
     label = y_train[y_train.instances_rep == instances].label
     print(label)
-    sequences.append((sequence_features, label))
+    sequences.append((sequence_features, label))"""
 
 
-tt = X_train[:32]
 
 class TimeSeriesDataset(torch.utils.data.Dataset):
-    def __init__(self, Xs, ys, Index_list, n_steps):
+    def __init__(self, Xs, ys, n_steps):
         super(torch.utils.data.Dataset,self).__init__()
-        self.index_list = Index_list
 
         ## convert to tensor
         X = [torch.tensor(group[group.columns[-n_steps:]].values) for instance,group in Xs.groupby("instances_rep")]
@@ -74,4 +72,3 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 
     def __getitem__(self, idx):
         return self.X[idx], self.y[idx]
-
