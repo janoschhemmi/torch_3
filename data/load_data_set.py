@@ -8,6 +8,7 @@ import sys
 import numpy as np
 import torch
 import sklearn
+from sklearn.preprocessing import LabelEncoder
 from torch.utils.data import Dataset
 
 ## labeler
