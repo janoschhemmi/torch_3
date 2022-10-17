@@ -41,8 +41,8 @@ from data import index_scaler
 from essentials import other_functions
 from essentials import check_path
 
-from model import Disturbance_Predictor_model_lstm
-from model import LSTM1
+from model import models
+
 
 
 ## Globals #######
