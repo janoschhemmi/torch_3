@@ -70,8 +70,8 @@ class Sequence_Dataset(Dataset):
     def __getitem__(self, idx):
         sequence, label = self.sequences[idx]
         return dict(
-            sequence=torch.Tensor(sequence.to_numpy()),
-            label=torch.tensor(label.to_numpy()).long().squeeze()
+            sequence= sequence,
+            label= label.long().squeeze()
         )
 
 ## create data set
