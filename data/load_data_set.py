@@ -96,7 +96,7 @@ class TimeSeriesDataset(torch.utils.data.Dataset):
 
         ## convert to tensor
         X = [torch.tensor(group[group.columns[-n_steps:]].values) for instance,group in Xs.groupby("instances_rep")]
-        y = torch.tensor(ys['label'])
+        y = torch.tensor(ys['label']).type(torch.LongTensor)
 
         self.X = X
         self.y = y
