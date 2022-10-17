@@ -36,9 +36,12 @@ from data import load_data_set
 from data import SequenceDataModule
 from data import data_labeler
 from data import TimeSeriesDataset
+from data import index_scaler
 
 from essentials import other_functions
 from essentials import check_path
+
+from model import Disturbance_Predictor_model_lstm
 
 
 ## Globals #######
@@ -57,6 +60,8 @@ check_path(save_model_path)
 N_EPOCHS = 1
 BATCH_SIZE = 10
 
+n_features = 8
+
 ## training logger path
 logger_path = "P:/workspace/jan/fire_detection/dl/models_store/07_LSTM/tl_logger/"
 check_path(logger_path)
@@ -72,42 +77,23 @@ if __name__ ==  '__main__':
     y_train = pd.read_csv(y_train_data_path, sep=';')
     print(X_train.shape, y_train.shape)
 
-    X_train.T
+    X_train_2 = index_scaler(X_train)
 
     # data label
-    y_train = data_labeler(y_train)
+    y_train   = data_labeler(y_train)
 
     ## data set
     dset = TimeSeriesDataset(X_train, y_train, 25)
 
     ## split train test
-    train_sequences, test_sequences = train_test_split(dset, test_size=0.2)
-    train_sequences[1]
+    train_sequences, test_sequences = train_test_split(dset, test_size=0.2, random_state= 102)
     print("Number of Training Sequences: ", len(train_sequences))
     print("Number of Testing Sequences: ", len(test_sequences))
-    """
 
-
-
-
-
-    # reshape
-    X_train = (X_train.set_index(['id', 'index', 'instances_rep'])
-               .rename_axis(['step'], axis=1)
-               .stack()
-               .unstack('index')
-               .reset_index())
-    FEATURE_COLUMNS = X_train.columns.tolist()[3:]
-
-    ## group per disturbance instance for individual sequence
-    sequences = []
-    for instances, group in X_train.groupby("instances_rep"):
-        print(id)
-        sequence_features = group[FEATURE_COLUMNS]
-        sequence_features = sequence_features.transpose()
-
-        label = y_train[y_train.instances_rep == instances].label
-        print(label)
-        sequences.append((sequence_features, label))
-    jj = sequences[0]
-    jj[0]
+    ## create Data Module
+    Dmod = SequenceDataModule(train_sequences, test_sequences, 32)
+    Dmod.train_sequences[1][0].shape
+    # Model learner
+    model = Disturbance_Predictor_model_lstm(
+        input_size=n_features ,
+        n_classes=len(y_train["label"].unique()))

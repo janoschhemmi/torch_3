@@ -1,0 +1,74 @@
+import torch
+import pytorch_lightning
+
+import pandas as pd
+import numpy as np
+from tqdm.auto import tqdm
+import torch
+import torch.autograd as autograd
+import torch.nn as nn
+from torch.autograd import Variable
+import torch.nn.functional as F
+import torch.optim as optim
+from torch.quantization import QuantStub, DeQuantStub
+from torch.utils.data import Dataset, DataLoader
+import torchvision
+import pytorch_lightning as pl
+from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
+from pytorch_lightning import loggers as pl_loggers
+from torchmetrics.functional import accuracy
+
+
+
+
+class LSTM1(nn.Module):
+    def __init__(self, num_classes, input_size, hidden_size, num_layers, seq_length, dropout):
+
+        """
+        ## general input of an LSTM: [batch_size, seq_len, input_size]
+
+        :param num_classes:  Number of classes to target
+        :param input_size:   Number of features per time step
+        :param hidden_size:  Size of Hidden and Cell State
+        :param num_layers:   Number of LSTM Layers stacked over each other
+        :param seq_length:   Number of time steps per sample
+        :param dropout:      ratio of dropout at each LSTM Layer
+        """
+
+        super(LSTM1, self).__init__()
+        self.num_classes = num_classes  # number of classes
+        self.num_layers = num_layers    # number of lstm stacked
+        self.input_size = input_size    # Number of features per time step
+        self.hidden_size = hidden_size  # size of hidden state
+        self.seq_length = seq_length    # length of sequence
+        self.dropout  = dropout         # dropout rate
+
+        self.lstm = nn.LSTM(input_size=input_size, hidden_size=hidden_size,
+                            num_layers=num_layers, batch_first=True)  # lstm
+        self.fc = nn.Linear(hidden_size, num_classes)  # fully connected out
+        self.relu = nn.ReLU()
+
+
+    def forward(self, x):
+        h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))  # hidden state
+        c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))  # internal state
+
+        print('x in 1: {}'.format(x.shape))
+
+        # Propagate input through LSTM
+        output, (hn, cn) = self.lstm(x, (h_0, c_0) )  # lstm with input, hidden, and internal state
+        print('hn 1: {}'.format(hn.shape))
+
+        hn = hn.transpose(0,1)
+        print('hn 1 viewed: {}'.format(hn.shape))
+
+        ## flatten
+        hn = torch.reshape(hn, (hn.size(0), hn.size(1) * hn.size(2) ))  # reshaping the data for Dense layer next
+        print('hn 1 flattened: {}'.format(hn.shape))
+        out = self.relu(hn)
+
+        out = self.fc(out)  # Final Output
+        print('out 2: {}'.format(out.shape))
+
+        return out
+

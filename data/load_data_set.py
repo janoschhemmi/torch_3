@@ -16,7 +16,7 @@ import pandas as pd
 
 
 ###
-def index_scaler(Xs, index_list, range):
+def index_scaler(Xs):
 
     colnames_keep = Xs.columns
     index_list = list(Xs['index'].unique())
