@@ -42,7 +42,7 @@ from essentials import other_functions
 from essentials import check_path
 
 from model import models
-
+from model import Disturbance_Predictor_model_lstm
 
 
 ## Globals #######
@@ -99,3 +99,9 @@ if __name__ ==  '__main__':
     model = Disturbance_Predictor_model_lstm(
         input_size=n_features ,
         n_classes=len(y_train["label"].unique()))
+
+    trainer = pl.Trainer(
+        max_epochs=N_EPOCHS
+    )
+
+    trainer.fit(model, Dmod)
