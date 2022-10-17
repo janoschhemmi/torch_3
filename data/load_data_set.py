@@ -71,7 +71,8 @@ class Sequence_Dataset(Dataset):
         sequence, label = self.sequences[idx]
         return dict(
             sequence= sequence,
-            label= label.long().squeeze()
+            label= label.tyoe(torch.LongTensor)
+            #label=label.long().squeeze()
         )
 
 ## create data set
