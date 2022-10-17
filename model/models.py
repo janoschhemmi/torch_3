@@ -100,7 +100,7 @@ class Disturbance_Predictor_model_lstm(pl.LightningModule):
         labels = batch["label"]
         #labels = labels.squeeze()
 
-        loss, outputs = self.forward(sequences, labels)
+        loss, outputs = self.forward(sequences, labels.long())
         print("output: ", outputs)
         predictions   = torch.argmax(outputs, dim=1)
         print("prediction:", predictions)
