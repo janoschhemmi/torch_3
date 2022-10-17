@@ -67,7 +67,7 @@ n_features = 8
 
 ## train params
 model = LSTM1(input_size=n_features ,
-                  num_classes=len(y_train["label"].unique()),
+                  num_classes=6,
                   hidden_size= 64,
                   num_layers= 2,
                   seq_length= 25,
@@ -104,6 +104,9 @@ if __name__ ==  '__main__':
     print("Number of Testing Sequences: ", len(test_sequences))
 
     ##
+    training_loop(n_epochs=N_EPOCHS,optimiser=optimiser,model=model,loss_fn = criterion,
+                  X_train = train_sequences[0],X_val = test_sequences[0],
+                  y_train=train_sequences[1], y_val=   test_sequences[1])
 
 
 
