@@ -94,6 +94,7 @@ if __name__ ==  '__main__':
     Dmod = SequenceDataModule(train_sequences, test_sequences, 32)
 
     # Model learner
+    print("initializing model")
     model = Disturbance_Predictor_model_lstm(
         input_size=n_features ,
         n_classes=len(y_train["label"].unique()))
