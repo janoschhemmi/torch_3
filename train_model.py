@@ -100,6 +100,11 @@ if __name__ ==  '__main__':
         input_size=n_features ,
         n_classes=len(y_train["label"].unique()))
 
+    ## define own trainer
+
+
+
+
     trainer = pl.Trainer(
         max_epochs=N_EPOCHS
     )
