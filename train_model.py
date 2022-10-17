@@ -43,6 +43,9 @@ from essentials import check_path
 
 from model import models
 from model import Disturbance_Predictor_model_lstm
+from model import LSTM1
+from model import training
+from model import training_loop
 
 
 ## Globals #######
@@ -60,8 +63,17 @@ check_path(save_model_path)
 ## model params
 N_EPOCHS = 1
 BATCH_SIZE = 10
-
 n_features = 8
+
+## train params
+model = LSTM1(input_size=n_features ,
+                  num_classes=len(y_train["label"].unique()),
+                  hidden_size= 64,
+                  num_layers= 2,
+                  seq_length= 25,
+                  dropout= 0.2)
+criterion = nn.MSELoss()
+optimiser = optim.Adam(model.parameters(), lr=0.008)
 
 ## training logger path
 logger_path = "P:/workspace/jan/fire_detection/dl/models_store/07_LSTM/tl_logger/"
@@ -91,7 +103,12 @@ if __name__ ==  '__main__':
     print("Number of Training Sequences: ", len(train_sequences))
     print("Number of Testing Sequences: ", len(test_sequences))
 
-    ## create Data Module
+    ##
+
+
+
+
+   """ ## create Data Module
     Dmod = SequenceDataModule(train_sequences, test_sequences, 32)
 
     # Model learner
@@ -102,11 +119,8 @@ if __name__ ==  '__main__':
 
     ## define own trainer
 
-
-
-
     trainer = pl.Trainer(
         max_epochs=N_EPOCHS
     )
 
-    trainer.fit(model, Dmod)
+    trainer.fit(model, Dmod)"""
