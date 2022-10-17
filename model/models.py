@@ -102,7 +102,7 @@ class Disturbance_Predictor_model_lstm(pl.LightningModule):
 
         loss, outputs = self.forward(sequences, labels.long())
         print("output: ", outputs)
-        predictions   = torch.argmax(outputs, dim=1)
+        predictions   = torch.argmax(outputs, dim=1).long
         print("prediction:", predictions)
         step_accuracy = accuracy(predictions, labels)
 
