@@ -92,7 +92,7 @@ if __name__ ==  '__main__':
 
     ## create Data Module
     Dmod = SequenceDataModule(train_sequences, test_sequences, 32)
-    Dmod.train_sequences[1][0].shape
+
     # Model learner
     model = Disturbance_Predictor_model_lstm(
         input_size=n_features ,

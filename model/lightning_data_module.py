@@ -25,6 +25,7 @@ from model import *
 class Disturbance_Predictor_model_lstm(pl.LightningModule):
     def __init__(self, n_classes: int, seq_length = 25, input_size = int, size_of_hidden_state = 50 ,num_layers = 2 ):
         super().__init__()
+        from model import *
         self.model = LSTM1(n_classes,input_size,size_of_hidden_state,num_layers,seq_length,dropout = 0.2)
         self.criterion = nn.CrossEntropyLoss()
 
