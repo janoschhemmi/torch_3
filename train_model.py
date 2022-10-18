@@ -59,8 +59,8 @@ save_model_path = r"P:\workspace\jan\fire_detection\dl\models_store\07_LSTM"
 check_path(save_model_path)
 
 ## model params
-N_EPOCHS = 10
-BATCH_SIZE = 25
+N_EPOCHS = 20
+BATCH_SIZE = 50
 n_features = 8
 
 ## training logger path
