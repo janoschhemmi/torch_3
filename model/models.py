@@ -65,9 +65,7 @@ class LSTM1(nn.Module):
         ## just take hn of last layer
         if (self.num_layers != 1 ):
             hn = hn[-1,:,:]
-        return(self.fc(self.relu(out)))  # Final Output
-
-
+        return(self.fc(self.relu(hn)))  # Final Output
 
 
 
