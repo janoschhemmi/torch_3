@@ -73,11 +73,11 @@ class LSTM1(nn.Module):
             print(hn.shape)
 
         print('hn 1: {}'.format(hn.shape))
-        hn = hn.transpose(0,1)
-        print('hn 1 viewed: {}'.format(hn.shape))
+        #hn = hn.transpose(0,1)
+        #print('hn 1 viewed: {}'.format(hn.shape))
 
         ## flatten hn
-        hn = torch.reshape(hn, (hn.size(0), hn.size(1) * hn.size(2) ))  # reshaping the data for Dense layer next
+        #hn = torch.reshape(hn, (hn.size(0), hn.size(1) * hn.size(2) ))  # reshaping the data for Dense layer next
         print('hn 1 flattened: {}'.format(hn.shape))
         out = self.relu(hn)
 
