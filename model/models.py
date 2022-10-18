@@ -102,7 +102,7 @@ class Disturbance_Predictor_model_lstm(pl.LightningModule):
         output = self.model(x)
         loss = 0
         if labels is not None:
-            loss = self.criterion(output.long(), labels.long())
+            loss = self.criterion(output, labels)
         return loss, output
 
     def training_step(self, batch, batch_idx):
@@ -110,11 +110,11 @@ class Disturbance_Predictor_model_lstm(pl.LightningModule):
         labels = batch["label"]
         #labels = labels.squeeze()
 
-        loss, outputs = self.forward(sequences, labels.long())
+        loss, outputs = self.forward(sequences, labels)
         print("output: ", outputs)
-        predictions   = torch.argmax(outputs, dim=1).long
+        predictions   = torch.argmax(outputs, dim=1)
         print("prediction:", predictions)
-        step_accuracy = accuracy(predictions, labels.long())
+        step_accuracy = accuracy(predictions, labels)
 
         self.log("train_loss", loss, prog_bar=True, logger=True)
         self.log("train_accuracy", step_accuracy, prog_bar=True, logger=True)
@@ -125,9 +125,9 @@ class Disturbance_Predictor_model_lstm(pl.LightningModule):
         sequences = batch["sequence"]
         labels = batch["label"]
 
-        loss, outputs = self.forward(sequences, labels.long())
+        loss, outputs = self.forward(sequences, labels)
         predictions   = torch.argmax(outputs, dim=1)
-        step_accuracy = accuracy(predictions.long(), labels.long())
+        step_accuracy = accuracy(predictions.long(), labels)
 
         self.log("val_loss", loss, prog_bar=True, logger=True)
         self.log("val_accuracy", step_accuracy, prog_bar=True, logger=True)
