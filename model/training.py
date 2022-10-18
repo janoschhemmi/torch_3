@@ -1,5 +1,6 @@
 import argparse
 import random
+import time
 
 import pandas as pd
 import numpy as np
@@ -26,51 +27,123 @@ import multiprocessing
 import seaborn as sns
 
 
-#
-trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
-                                        download=True, transform=transform)
-trainloader = torch.utils.data.DataLoader(trainset, batch_size=batch_size,
-                                          shuffle=True, num_workers=2)
+def train_model(model, criterion, optimizer, history,data_module ,batch_size ,scheduler=None,
+                num_epochs, save_path='checkpoint', continue_training=False, start_epoch=0):
 
-testset = torchvision.datasets.CIFAR10(root='./data', train=False,
-                                       download=True, transform=transform)
-testloader = torch.utils.data.DataLoader(testset, batch_size=batch_size,
-                                         shuffle=False, num_workers=2)
+    # load trained model
+    if continue_training:
+        with open(BASE_PATH + 'weights/{}_{}.model'.format(save_path, start_epoch - 1), 'rb') as f:
+            state = torch.load(f, map_location=DEVICE)
+            model.load_state_dict(state)
+        with open(BASE_PATH + 'weights/{}_{}.optimizer'.format(save_path, start_epoch - 1), 'rb') as f:
+            state = torch.load(f, map_location=DEVICE)
+            optimizer.load_state_dict(state)
+        with open(BASE_PATH + 'weights/{}_{}.history'.format(save_path, start_epoch - 1), 'rb') as f:
+            history = torch.load(f)
+        if scheduler:
+            with open(BASE_PATH + 'weights/{}_{}.scheduler'.format(save_path, start_epoch - 1), 'rb') as f:
+                state = torch.load(f, map_location=DEVICE)
+                scheduler.load_state_dict(state)
 
-for epoch in range(2):  # loop over the dataset multiple times
+    num_epochs = 2
+    data_module = Data_module
+    batch_size = 25
 
-    running_loss = 0.0
-    for i, data in enumerate(trainloader, 0):
-        # get the inputs; data is a list of [inputs, labels]
-        inputs, labels = data
+    for epoch in range(start_epoch, num_epochs):
+        print("Epoch: ", epoch)
+        since = time.time()
 
-        # zero the parameter gradients
-        optimizer.zero_grad()
+        # Each epoch has a training and validation phase
+        for phase in ['train', 'val']:
+            if phase == 'train':
+                model.train()  # Set model to training mode
 
-        # forward + backward + optimize
-        outputs = net(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
+                all_loader = torch.utils.data.DataLoader(
+                    data_module.train_sequences, batch_size=batch_size,
+                    shuffle=False
+                )
 
-        # print statistics
-        running_loss += loss.item()
-        if i % 2000 == 1999:    # print every 2000 mini-batches
-            print(f'[{epoch + 1}, {i + 1:5d}] loss: {running_loss / 2000:.3f}')
-            running_loss = 0.0
+            else:
+                model.eval()   # Set model to evaluate mode
+                all_loader = torch.utils.data.DataLoader(
+                    data_module.test_sequences, batch_size=batch_size,
+                    shuffle=False
+                )
 
-print('Finished Training')
+            running_metrics = {}
 
-def training_loop(n_epochs, optimiser, model, loss_fn, X_train,  X_val, y_train, y_val):
-    for epoch in range(1, n_epochs + 1):
-        output_train = model(X_train) # forwards pass
-        loss_train = loss_fn(output_train, y_train) # calculate loss
-        output_val = model(X_val)
-        loss_val = loss_fn(output_val, y_val)
+            """Iterate over data.
+            `dataloaders` is a dict{'train': train_dataloader
+                                    'val': validation_dataloader}
+            """
+            iterator = tqdm(all_loader)
+            print(iterator)
+            for batch in iterator:
+                """
+                Batch comes as a dict.
+                """
+                #for k in batch:
+                #    batch[k] = batch[k].to(DEVICE)
 
-        optimiser.zero_grad() # set gradients to zero
-        loss_train.backward() # backwards pass
-        optimiser.step() # update model parameters
-        if epoch == 1 or epoch % 10000 == 0:
-            print(f"Epoch {epoch}, Training loss {loss_train.item():.4f},"
-                  f" Validation loss {loss_val.item():.4f}")
+                # zero the parameter gradients
+                optimizer.zero_grad()
+
+                # forward
+                # track history if only in train
+                with torch.set_grad_enabled(phase == 'train'):
+
+                    ## look into what is in a batch and try to parse it to the model
+                    outputs = model(batch['src'],
+                                    batch['dst'],
+                                    batch['src_lengths'],
+                                    batch['dst_lengths'])
+                    _, preds = outputs.max(dim=2)
+
+                    loss = criterion(outputs.view(-1, len(train_dataset.src_token2id)), batch['dst'].view(-1))
+
+                    # backward + optimize only if in training phase
+                    if phase == 'train':
+                        loss.backward()
+                        nn.utils.clip_grad_norm_(model.parameters(), GRADIENT_CLIPPING)
+                        optimizer.step()
+
+                # statistics
+                running_metrics.setdefault('loss', 0.0)
+                running_metrics['loss'] += loss.item() * batch['src'].size(0)
+                for pred, ground_truth in zip(preds, batch['dst']):
+                    metrics = get_metrics(pred, ground_truth)       # supposed to return a dictionary of metrics
+                    for metric_name in metrics:
+                        running_metrics.setdefault(metric_name, 0.0)
+                        running_metrics[metric_name] += metrics[metric_name]
+
+            for metric_name in running_metrics:
+                multiplier = 1
+                average_metric = running_metrics[metric_name] / dataset_sizes[phase]
+                history.setdefault(phase, {}).setdefault(metric_name, []).append(average_metric * multiplier)
+
+            print('{} Loss: {:.4f} Rouge: {:.4f}'.format(
+                phase, history[phase]['loss'][-1], history[phase]['rouge-l'][-1]))
+
+            # LR scheduler
+            if scheduler and phase == 'val':
+                scheduler.step(history['val']['loss'][-1])
+
+        # save model and history
+        with open(BASE_PATH + 'weights/{}_{}.model'.format(save_path, epoch), 'wb') as f:
+            torch.save(model.state_dict(), f)
+        with open(BASE_PATH + 'weights/{}_{}.optimizer'.format(save_path, epoch), 'wb') as f:
+            torch.save(optimizer.state_dict(), f)
+        with open(BASE_PATH + 'weights/{}_{}.history'.format(save_path, epoch), 'wb') as f:
+            torch.save(history, f)
+        if scheduler:
+            with open(BASE_PATH + 'weights/{}_{}.scheduler'.format(save_path, epoch), 'wb') as f:
+                torch.save(scheduler.state_dict(), f)
+
+
+        time_elapsed = time.time() - since
+        history.setdefault('times', []).append(time_elapsed)     # save times per-epoch
+        print('Epoch {} complete in {:.0f}m {:.0f}s'.format(epoch,
+            time_elapsed // 60, time_elapsed % 60))
+        print()
+
+

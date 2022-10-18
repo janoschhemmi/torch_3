@@ -103,16 +103,10 @@ if __name__ ==  '__main__':
     print("Number of Training Sequences: ", len(train_sequences))
     print("Number of Testing Sequences: ", len(test_sequences))
 
-    ##
-    training_loop(n_epochs=N_EPOCHS,optimiser=optimiser,model=model,loss_fn = criterion,
-                  X_train = train_sequences[0],X_val = test_sequences[0],
-                  y_train=train_sequences[1], y_val=   test_sequences[1])
+    ## dataloader
+    ## here augmentation and normalization could be done
+    Data_module = SequenceDataModule(train_sequences, test_sequences, BATCH_SIZE)
 
-
-
-
-   """ ## create Data Module
-    Dmod = SequenceDataModule(train_sequences, test_sequences, 32)
 
     # Model learner
     print("initializing model")
@@ -125,5 +119,6 @@ if __name__ ==  '__main__':
     trainer = pl.Trainer(
         max_epochs=N_EPOCHS
     )
+    trainer.train_dataloader
 
-    trainer.fit(model, Dmod)"""
+    trainer.fit(model, Dmod)
