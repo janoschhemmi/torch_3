@@ -58,10 +58,16 @@ class LSTM1(nn.Module):
         ## transform input x
         x = torch.transpose(x,1,2)
         print('x in 1: {}'.format(x.shape))
+        print(h_0.dtype)
+        print(c_0.dtype)
 
         print(x.dtype)
         # Propagate input through LSTM
         output, (hn, cn) = self.lstm(x, (h_0, c_0) )  # lstm with input, hidden, and internal state
+        print(output.dtype)
+        print(hn.dtype)
+        print(cn.dtype)
+
         print('hn 1: {}'.format(hn.shape))
 
         hn = hn.transpose(0,1)

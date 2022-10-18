@@ -44,8 +44,6 @@ from essentials import check_path
 from model import models
 from model import Disturbance_Predictor_model_lstm
 from model import LSTM1
-from model import training
-from model import training_loop
 
 
 ## Globals #######
@@ -110,7 +108,7 @@ if __name__ ==  '__main__':
 
     # Model learner
     print("initializing model")
-    model = Disturbance_Predictor_model_lstm(
+    learner = Disturbance_Predictor_model_lstm(
         input_size=n_features ,
         n_classes=len(y_train["label"].unique()))
 
@@ -119,6 +117,6 @@ if __name__ ==  '__main__':
     trainer = pl.Trainer(
         max_epochs=N_EPOCHS
     )
-    trainer.train_dataloader
 
-    trainer.fit(model, Dmod)
+
+    trainer.fit(learner, Data_module)
