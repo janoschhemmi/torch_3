@@ -68,7 +68,9 @@ class LSTM1(nn.Module):
 
         ## just take hn of last layer
         if (self.num_layers != 1 ):
+            print("hello")
             hn = hn[1,:,:]
+            print(hn.shape)
 
         print('hn 1: {}'.format(hn.shape))
         hn = hn.transpose(0,1)
