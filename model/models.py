@@ -82,7 +82,7 @@ class LSTM1(nn.Module):
 
 ## Define TRaining and Validation steps
 class Disturbance_Predictor_model_lstm(pl.LightningModule):
-    def __init__(self, n_classes: int, seq_length = 25, input_size = int, size_of_hidden_state = 50 ,num_layers = 2 ):
+    def __init__(self, n_classes: int,  input_size = int, seq_length = 25,size_of_hidden_state = 50 ,num_layers = 2 ):
         super().__init__()
 
 
