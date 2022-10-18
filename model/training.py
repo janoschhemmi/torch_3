@@ -26,7 +26,7 @@ from sklearn.preprocessing import Normalizer
 import multiprocessing
 import seaborn as sns
 
-
+"""
 def train_model(model, criterion, optimizer, history,data_module ,batch_size ,scheduler=None,
                 num_epochs, save_path='checkpoint', continue_training=False, start_epoch=0):
 
@@ -147,3 +147,4 @@ def train_model(model, criterion, optimizer, history,data_module ,batch_size ,sc
         print()
 
 
+"""
