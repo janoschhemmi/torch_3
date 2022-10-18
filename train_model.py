@@ -63,16 +63,6 @@ N_EPOCHS = 1
 BATCH_SIZE = 10
 n_features = 8
 
-## train params
-model = LSTM1(input_size=n_features ,
-                  num_classes=6,
-                  hidden_size= 64,
-                  num_layers= 2,
-                  seq_length= 25,
-                  dropout= 0.2)
-criterion = nn.MSELoss()
-optimiser = optim.Adam(model.parameters(), lr=0.008)
-
 ## training logger path
 logger_path = "P:/workspace/jan/fire_detection/dl/models_store/07_LSTM/tl_logger/"
 check_path(logger_path)
