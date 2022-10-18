@@ -52,39 +52,21 @@ class LSTM1(nn.Module):
     def forward(self, x):
         h_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))  # hidden state
         c_0 = Variable(torch.zeros(self.num_layers, x.size(0), self.hidden_size))  # internal state
-
-        print('x in 1: {}'.format(x.shape))
+        #print('x in 1: {}'.format(x.shape))
 
         ## transform input x
         x = torch.transpose(x,1,2)
-        print('x in 1: {}'.format(x.shape))
+        #print('x in 1: {}'.format(x.shape))
         x = torch.tensor(x, dtype = torch.float32)
 
         # Propagate input through LSTM
         output, (hn, cn) = self.lstm(x, (h_0, c_0) )  # lstm with input, hidden, and internal state
-        print(output.dtype)
-        print(hn.dtype)
-        print(cn.dtype)
 
         ## just take hn of last layer
         if (self.num_layers != 1 ):
-            print("hello")
-            hn = hn[1,:,:]
-            print(hn.shape)
+            hn = hn[-1,:,:]
+        return(self.fc(self.relu(out)))  # Final Output
 
-        print('hn 1: {}'.format(hn.shape))
-        #hn = hn.transpose(0,1)
-        #print('hn 1 viewed: {}'.format(hn.shape))
-
-        ## flatten hn
-        #hn = torch.reshape(hn, (hn.size(0), hn.size(1) * hn.size(2) ))  # reshaping the data for Dense layer next
-        print('hn 1 flattened: {}'.format(hn.shape))
-        out = self.relu(hn)
-
-        out = self.fc(out)  # Final Output
-        print('out 2: {}'.format(out.shape))
-
-        return out
 
 
 
