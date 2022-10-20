@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 from tqdm.auto import tqdm
 import torch
+import torchvision
+
 import torch.autograd as autograd
 import torch.nn as nn
 from torch.autograd import Variable
@@ -12,7 +14,9 @@ import torch.nn.functional as F
 import torch.optim as optim
 from torch.quantization import QuantStub, DeQuantStub
 from torch.utils.data import Dataset, DataLoader
-import torchvision
+from torch.utils.tensorboard import SummaryWriter
+from torchvision import datasets, transforms
+
 import pytorch_lightning as pl
 from pytorch_lightning.callbacks import ModelCheckpoint, EarlyStopping
 from pytorch_lightning import loggers as pl_loggers
@@ -20,6 +24,7 @@ from torchmetrics.functional import accuracy
 from sklearn.metrics import classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
+from pytorch_lightning.callbacks import TQDMProgressBar
 from sklearn.preprocessing import Normalizer
 
 import multiprocessing
@@ -54,19 +59,40 @@ random.seed(102)
 x_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\06_df_x_12_250smps.csv"
 y_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\06_df_y_12_250smps.csv"
 
-## path to safe model
-save_model_path = r"P:\workspace\jan\fire_detection\dl\models_store\07_LSTM"
+
+#-----------------------------------------------------------------------
+## Copy this section for Prediction
+
+# path to safe model
+model_architecture = "10_LSTM"
+save_model_path = "P:/workspace/jan/fire_detection/dl/models_store/" + model_architecture
 check_path(save_model_path)
 
 ## model params
-N_EPOCHS = 20
-BATCH_SIZE = 50
+N_EPOCHS = 50
+BATCH_SIZE = 100
 n_features = 8
+batch_norm_trigger = False
+save = True
+load_model = False
+
+num_layers = 1
+dropout_rate = 0.5
+learning_rate = 0.001
+
+version_name =f'nlayers {num_layers} dropout {dropout_rate} learning_rate {learning_rate} batchsize {BATCH_SIZE} n_epochs {N_EPOCHS} batchnorm {batch_norm_trigger} 1fc'
+model_name = f'\LSTM_{N_EPOCHS}_epochs_{BATCH_SIZE}_batchsize.pt'
+
+## Copy this section for Prediction
+#-----------------------------------------------------------------------
+
+
 
 ## training logger path
-logger_path = "P:/workspace/jan/fire_detection/dl/models_store/07_LSTM/tl_logger/"
+logger_path = save_model_path + "/logger"
 check_path(logger_path)
-logger_name = "Disturbance_predictor_9"
+experiment_name = "Disturbances_lstm"
+
 
 ## ---------------------------------------------------------------------------------------------------------------------
 ## Main
@@ -78,7 +104,7 @@ if __name__ ==  '__main__':
     y_train = pd.read_csv(y_train_data_path, sep=';')
     print(X_train.shape, y_train.shape)
 
-    X_train_2 = index_scaler(X_train)
+    # X_train_2 = index_scaler(X_train)
 
     # data label
     y_train   = data_labeler(y_train)
@@ -95,18 +121,36 @@ if __name__ ==  '__main__':
     ## here augmentation and normalization could be done
     Data_module = SequenceDataModule(train_sequences, test_sequences, BATCH_SIZE)
 
+    ## init logger
+    tb_logger = pl_loggers.TensorBoardLogger(save_dir=logger_path,
+                                             name=experiment_name,
+                                             version=version_name,
+                                             default_hp_metric= False)
 
     # Model learner
     print("initializing model")
-    learner = Disturbance_Predictor_model_lstm(
+    model = Disturbance_Predictor_model_lstm(
         input_size=n_features ,
-        n_classes=len(y_train["label"].unique()))
+        n_classes=len(y_train["label"].unique()),
+        num_layers=num_layers,
+        learning_rate=learning_rate,
+        batch_norm_trigger = batch_norm_trigger,
+        batch_size = BATCH_SIZE)
 
-    ## define own trainer
+    if load_model:
+        model = torch.load(save_model_path+model_name)
+        print("loaded model")
 
     trainer = pl.Trainer(
-        max_epochs=N_EPOCHS
+        logger=tb_logger,
+        max_epochs=N_EPOCHS,
+        callbacks=[TQDMProgressBar(refresh_rate=10)]
     )
 
+    trainer.fit(model, Data_module)
 
-    trainer.fit(learner, Data_module)
+    if save:
+        torch.save(model, save_model_path+model_name)
+        print("saved model, TSCHAUTSCHAU")
+
+

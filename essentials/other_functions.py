@@ -5,8 +5,15 @@ def check_path(path):
     if os.path.exists(path):
         print("path exists")
     else:
-        os.mkdir(path)
-        print("path created")
+
+        try:
+            os.mkdir(path)
+            print("path created")
+
+        except FileNotFoundError:
+            os.makedirs(path)
+            print("path created")
+
 
 
 
