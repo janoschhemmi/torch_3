@@ -56,15 +56,15 @@ plt.switch_backend('agg')
 random.seed(102)
 
 ## X train path
-x_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\06_df_x_12_250smps.csv"
-y_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\06_df_y_12_250smps.csv"
+x_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\07_df_x_12_500smps_nowind.csv"
+y_train_data_path = r"P:\workspace\jan\fire_detection\dl\prepocessed_ref_tables\07_df_y_12_500smps_nowind.csv"
 
 
 #-----------------------------------------------------------------------
 ## Copy this section for Prediction
 
 # path to safe model
-model_architecture = "10_LSTM"
+model_architecture = "11_LSTM"
 save_model_path = "P:/workspace/jan/fire_detection/dl/models_store/" + model_architecture
 check_path(save_model_path)
 
@@ -73,15 +73,17 @@ N_EPOCHS = 50
 BATCH_SIZE = 100
 n_features = 8
 batch_norm_trigger = False
+shuffle = False
 save = True
 load_model = False
 
-num_layers = 1
+num_layers = 2
+hidden_state_size = 300
 dropout_rate = 0.5
 learning_rate = 0.001
 
-version_name =f'nlayers {num_layers} dropout {dropout_rate} learning_rate {learning_rate} batchsize {BATCH_SIZE} n_epochs {N_EPOCHS} batchnorm {batch_norm_trigger} 1fc'
-model_name = f'\LSTM_{N_EPOCHS}_epochs_{BATCH_SIZE}_batchsize.pt'
+version_name =f'nlayers {num_layers} dropout {dropout_rate} learning_rate {learning_rate} batchsize {BATCH_SIZE} n_epochs {N_EPOCHS} batchnorm {batch_norm_trigger} hiddenstatesize {hidden_state_size} 1fc shuffle {shuffle}'
+model_name = f'\\LSTM_{N_EPOCHS}_epochs_{BATCH_SIZE}_batchsize_5classes.pt'
 
 ## Copy this section for Prediction
 #-----------------------------------------------------------------------
@@ -108,6 +110,7 @@ if __name__ ==  '__main__':
 
     # data label
     y_train   = data_labeler(y_train)
+    y_train["disturbance"].unique()
 
     ## data set
     dset = TimeSeriesDataset(X_train, y_train, 25)
@@ -119,7 +122,7 @@ if __name__ ==  '__main__':
 
     ## dataloader
     ## here augmentation and normalization could be done
-    Data_module = SequenceDataModule(train_sequences, test_sequences, BATCH_SIZE)
+    Data_module = SequenceDataModule(train_sequences, test_sequences, BATCH_SIZE, shuffle)
 
     ## init logger
     tb_logger = pl_loggers.TensorBoardLogger(save_dir=logger_path,
@@ -135,7 +138,8 @@ if __name__ ==  '__main__':
         num_layers=num_layers,
         learning_rate=learning_rate,
         batch_norm_trigger = batch_norm_trigger,
-        batch_size = BATCH_SIZE)
+        batch_size = BATCH_SIZE,
+        size_of_hidden_state = hidden_state_size)
 
     if load_model:
         model = torch.load(save_model_path+model_name)

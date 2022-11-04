@@ -4,5 +4,5 @@ Description: __init__ file  for essentials
 """
 
 from .models import *
-#from .training import *
+from .training import *
 

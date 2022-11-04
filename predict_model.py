@@ -69,29 +69,34 @@ refs_to_plot = ['Harvest','Fire','Insect','Wind']
 
 #-----------------------------------------------------------------------
 ## Copy this section
+# path to safe model
 
 # path to safe model
-model_architecture = "09_LSTM"
+model_architecture = "11_LSTM"
 save_model_path = "P:/workspace/jan/fire_detection/dl/models_store/" + model_architecture
 check_path(save_model_path)
 
 ## model params
-N_EPOCHS = 70
+N_EPOCHS = 50
 BATCH_SIZE = 100
 n_features = 8
+batch_norm_trigger = False
+shuffle = False
 save = True
 load_model = False
 
-num_layers = 1
-dropout_rate = 0.4
-learning_rate = 0.01
+num_layers = 2
+hidden_state_size = 300
+dropout_rate = 0.5
+learning_rate = 0.001
 
-version_name =f'nlayers {num_layers} dropout {dropout_rate} learning_rate {learning_rate} batchsize {BATCH_SIZE} n_epochs {N_EPOCHS}'
-model_name = f'\LSTM_{N_EPOCHS}_epochs_{BATCH_SIZE}_batchsize.pt'
-
+version_name =f'nlayers {num_layers} dropout {dropout_rate} learning_rate {learning_rate} batchsize {BATCH_SIZE} n_epochs {N_EPOCHS} batchnorm {batch_norm_trigger} hiddenstatesize {hidden_state_size} 1fc shuffle {shuffle}'
+model_name = f'\\LSTM_{N_EPOCHS}_epochs_{BATCH_SIZE}_batchsize_5classes.pt'
 
 ## Copy this section
 #-----------------------------------------------------------------------
+
+wind = False
 
 ## out paths
 base_path = f'P:/workspace/jan/fire_detection/dl/plots/{model_architecture}/'
@@ -137,7 +142,7 @@ ids = X_ts['id'].unique()
 
 plt.switch_backend('agg')
 ## loop over ids
-for id in ids[8:20]:
+for id in ids[20:40]:
     print(id)
     #id = 1059
 
@@ -148,7 +153,7 @@ for id in ids[8:20]:
     tile_id = sample['tile'].values[0]
 
     ## into long format
-    sample = sample.pivot(index='index', columns='date', values='valuenorm')
+    sample = sample.pivot(index='index', columns='date', values='value')
 
     index = list(sample.index)
     dates = list(sample.columns)
@@ -218,16 +223,22 @@ for id in ids[8:20]:
 
     h = ax_1.plot(dates_prediction, predictions)
     h[4].set_alpha(0.4)
-    h[5].set_alpha(0.7)
+
+    if wind:
+        h[5].set_alpha(0.7)
     h[4].set_linestyle('dashdot')
-    h[5].set_linestyle(':')
+
+    if wind:
+        h[5].set_linestyle(':')
 
     h[0].set_color("red")
     h[1].set_color("brown")
     h[2].set_color("goldenrod")
     h[3].set_color("blue")
     h[4].set_color("black")
-    h[5].set_color("green")
+
+    if wind:
+        h[5].set_color("green")
 
     ax_1.legend(['fire','harvest','insect','wind','stable','growth'], fontsize=16,bbox_to_anchor=(1.01, 1), loc="upper left")
 
